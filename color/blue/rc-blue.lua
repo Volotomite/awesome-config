@@ -32,7 +32,9 @@ require("colorless.ercheck-config") -- load file with error handling
 -- Setup theme and environment vars
 -----------------------------------------------------------------------------------------------------------------------
 local env = require("color.blue.env-config") -- load file with environment
-env:init({ theme = "blue" })
+
+--env:init({ theme = "blue" })
+env:init({ theme = "blue", desktop_autohide = true, set_center = true })
 
 
 -- Layouts setup
@@ -59,7 +61,10 @@ local separator = redflat.gauge.separator.vertical()
 local tasklist = {}
 
 -- load list of app name aliases from files and set it as part of tasklist theme
+-- TODO red here
 tasklist.style = { appnames = require("color.blue.alias-config")}
+tasklist.style = { widget = redflat.gauge.task.red.new }
+--tasklist.style = { widget = redflat.gauge.task.green.new }
 
 tasklist.buttons = awful.util.table.join(
 	awful.button({}, 1, redflat.widget.tasklist.action.select),
@@ -72,7 +77,22 @@ tasklist.buttons = awful.util.table.join(
 -- Taglist widget
 --------------------------------------------------------------------------------
 local taglist = {}
-taglist.style = { separator = separator, widget = redflat.gauge.tag.blue.new, show_tip = true }
+
+-- TODO Ruby rests here for now
+taglist.style = { widget = redflat.gauge.tag.ruby.new, show_tip = true }
+
+-- double line taglist
+taglist.cols_num = 6
+taglist.rows_num = 2
+
+taglist.layout = wibox.widget {
+	expand          = true,
+	forced_num_rows = taglist.rows_num,
+	forced_num_cols = taglist.cols_num,
+    layout          = wibox.layout.grid,
+}
+
+-- buttons
 taglist.buttons = awful.util.table.join(
 	awful.button({         }, 1, function(t) t:view_only() end),
 	awful.button({ env.mod }, 1, function(t) if client.focus then client.focus:move_to_tag(t) end end),
@@ -83,6 +103,17 @@ taglist.buttons = awful.util.table.join(
 	awful.button({         }, 5, function(t) awful.tag.viewprev(t.screen) end)
 )
 
+-- some tag settings which indirectky depends on row and columns number of taglist
+taglist.names = {
+	"Prime", "Full", "Code", "Edit", "Misc", "Game",
+	"Spare", "Back", "Test", "Qemu", "Data", "Free"
+}
+
+local al = awful.layout.layouts
+taglist.layouts = {
+	al[5], al[6], al[6], al[4], al[3], al[3],
+	al[5], al[6], al[6], al[4], al[3], al[1]
+}
 -- Textclock widget
 --------------------------------------------------------------------------------
 local textclock = {}
@@ -142,6 +173,28 @@ kbindicator.buttons = awful.util.table.join(
 	awful.button({}, 5, function () redflat.widget.keyboard:toggle(true)  end)
 )
 
+
+-- PA microphone
+--------------------------------------------------------------------------------
+local microphone = {}
+
+-- tricky custom style
+local microphone_style = {
+	widget = redflat.gauge.audio.blue.new,
+	audio = beautiful.individual and beautiful.individual.microphone_audio or {},
+}
+--microphone_style.audio.gauge = redflat.gauge.monitor.dash
+microphone_style.audio.gauge = false
+
+-- init widget
+microphone.widget = redflat.widget.pulse({ type = "source" }, microphone_style)
+
+microphone.buttons = awful.util.table.join(
+	awful.button({}, 2, function() microphone.widget:mute() end),
+	awful.button({}, 4, function() microphone.widget:change_volume() end),
+	awful.button({}, 5, function() microphone.widget:change_volume({ down = true }) end)
+)
+
 -- Mail widget
 --------------------------------------------------------------------------------
 -- mail settings template
@@ -184,6 +237,7 @@ sysmon.widget.network = redflat.widget.net(
 		speed = { up = 6 * 1024^2, down = 6 * 1024^2 },
 		autoscale = false
 	},
+	-- custom style
 	{ timeout = 2, widget = redflat.gauge.monitor.double, monitor = { icon = sysmon.icon.network } }
 )
 
@@ -215,7 +269,7 @@ sysmon.buttons.cpuram = awful.util.table.join(
 -----------------------------------------------------------------------------------------------------------------------
 
 -- aliases for setup
-local al = awful.layout.layouts
+--local al = awful.layout.layouts
 
 -- setup
 awful.screen.connect_for_each_screen(
@@ -224,14 +278,18 @@ awful.screen.connect_for_each_screen(
 		env.wallpaper(s)
 
 		-- tags
-		awful.tag({ "Main", "Full", "Edit", "Read", "Free" }, s, { al[5], al[6], al[6], al[4], al[3] })
+		--awful.tag({ "Main", "Full", "Edit", "Read", "Free" }, s, { al[5], al[6], al[6], al[4], al[3] })
+		awful.tag(taglist.names, s, taglist.layouts)
 
 		-- layoutbox widget
 		layoutbox[s] = redflat.widget.layoutbox({ screen = s })
 
 		-- taglist widget
-		taglist[s] = redflat.widget.taglist({ screen = s, buttons = taglist.buttons, hint = env.tagtip }, taglist.style)
+		--taglist[s] = redflat.widget.taglist({ screen = s, buttons = taglist.buttons, hint = env.tagtip }, taglist.style)
 
+		taglist[s] = redflat.widget.taglist(
+			{ screen = s, buttons = taglist.buttons, hint = env.tagtip, layout = taglist.layout }, taglist.style
+		)
 		-- tasklist widget
 		tasklist[s] = redflat.widget.tasklist({ screen = s, buttons = tasklist.buttons }, tasklist.style)
 
@@ -267,6 +325,7 @@ awful.screen.connect_for_each_screen(
 				env.wrapper(sysmon.widget.network, "network"),
 				separator,
 				env.wrapper(sysmon.widget.cpuram, "cpuram", sysmon.buttons.cpuram),
+				--env.wrapper(microphone.widget, "microphone", microphone.buttons),
 				separator,
 				env.wrapper(volume.widget, "volume", volume.buttons),
 				separator,
@@ -311,6 +370,11 @@ local appkeys = require("color.blue.appkeys-config") -- load file with applicati
 local hotkeys = require("color.blue.keys-config") -- load file with hotkeys configuration
 hotkeys:init({ env = env, menu = mymenu.mainmenu, appkeys = appkeys, volume = volume.widget })
 
+--local hotkeys = require("shade.ruby.keys-config") -- load file with hotkeys configuration
+--hotkeys:init({
+--	env = env, menu = mymenu.mainmenu, appkeys = appkeys, tag_cols_num = taglist.cols_num,
+--	microphone = microphone.widget, volume = volume.widget
+ --})
 
 -- Rules
 -----------------------------------------------------------------------------------------------------------------------
