@@ -12,6 +12,8 @@ local theme = require("themes/colored/theme")
 -----------------------------------------------------------------------------------------------------------------------
 theme.color.main   = "#064E71"
 theme.color.urgent = "#B32601"
+--theme.color.main   = "#A30817"
+--theme.color.urgent = "#016B84"
 
 
 -- Common
@@ -46,7 +48,7 @@ theme.desktop.places = {
 	cpumem   = { 1, 2 },
 	transm   = { 1, 3 },
 	disks    = { 1, 4 },
-	thermal  = { 1, 5 }
+	thermal  = { 1, 5 }, -- temperature(?)
 }
 
 -- Desktop widgets
@@ -69,14 +71,16 @@ theme.desktop.multimeter.lines.show = { label = false, tooltip = false, text = t
 -- Multimeter cpu and ram (individual widget)
 theme.individual.desktop.multimeter.cpumem = {
 	labels = { "RAM", "SWAP" },
-	icon   = { image = theme.path .. "/desktop/bstar.svg" }
+	--icon   = { image = theme.path .. "/desktop/bstar.svg" }
+	icon   = { image = theme.path .. "/desktop/ed2.svg" }
 }
 
 -- Multimeter transmission info (individual widget)
 theme.individual.desktop.multimeter.transmission = {
 	labels = { "SEED", "DNLD" },
 	unit   = { { "KB", -1 }, { "MB", 1024^1 } },
-	icon   = { image = theme.path .. "/desktop/skull.svg" }
+	--icon   = { image = theme.path .. "/desktop/skull.svg" }
+	icon   = { image = theme.path .. "/desktop/ed1.svg" }
 }
 
 -- Multilines disks (individual widget)
