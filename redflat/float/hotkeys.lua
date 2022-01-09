@@ -332,6 +332,15 @@ function hotkeys:highlight()
 end
 
 
+-- Switch language
+-----------------------------------------------------------------------------------------------------------------------
+function hotkeys:lang_switch()
+	local layout = awesome.xkb_get_layout_group() + 1
+	awesome.xkb_set_layout_group(layout)
+
+end
+
+
 -- Show/hide widget
 -----------------------------------------------------------------------------------------------------------------------
 

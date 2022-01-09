@@ -4,6 +4,7 @@
 
 -- Grab environment
 local table = table
+local unpack = unpack or table.unpack
 local awful = require("awful")
 local redflat = require("redflat")
 
@@ -23,6 +24,8 @@ local grid = redflat.layout.grid
 local map = redflat.layout.map
 local redtitle = redflat.titlebar
 local qlaunch = redflat.float.qlaunch
+local numkeys_line = { "1", "2", "3", "4", "5", "6", "7", "8", "9" }
+local tagkeys_line = { "q", "w", "e", "r", "t", "y", "u", "i", "o" }
 
 -- Key support functions
 -----------------------------------------------------------------------------------------------------------------------
@@ -122,7 +125,14 @@ function hotkeys:init(args)
 	local env = args.env
 	local volume = args.volume
 	local mainmenu = args.menu
+	local microphone = args.microphone
 	local appkeys = args.appkeys or {}
+	
+	-- tag cols vars for multi-row tag switch
+	local tcn = args.tag_cols_num or 0
+
+	local numkeys = { unpack(numkeys_line, 1, tcn) }
+	local tagkeys = { unpack(tagkeys_line, 1, tcn) }
 
 	self.mouse.root = (awful.util.table.join(
 		awful.button({ }, 3, function () mainmenu:toggle() end),
@@ -581,6 +591,11 @@ function hotkeys:init(args)
 	-- Global keys
 	--------------------------------------------------------------------------------
 	self.raw.root = {
+		{
+			--{ env.mod }, "space", function() awesome.xkb_set_layout_group(1) end,
+			{ env.mod }, "space", function() redtip:lang_switch() end,
+			{ description = "Switch language", group = "Language" }
+		},
 		{
 			{ env.mod }, "F1", function() redtip:show() end,
 			{ description = "[Hold] Show awesome hotkeys helper", group = "Main" }
