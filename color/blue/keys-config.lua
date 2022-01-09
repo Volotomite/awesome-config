@@ -7,6 +7,7 @@ local table = table
 local unpack = unpack or table.unpack
 local awful = require("awful")
 local redflat = require("redflat")
+local xrandr = require("xrandr")
 
 -- Initialize tables and vars for module
 -----------------------------------------------------------------------------------------------------------------------
@@ -591,6 +592,10 @@ function hotkeys:init(args)
 	-- Global keys
 	--------------------------------------------------------------------------------
 	self.raw.root = {
+		{
+			{ env.mod }, "F3", function() xrandr.xrandr() end,
+			{ description = "Monitor configure", group = "Monitor" }
+		},
 		{
 			--{ env.mod }, "space", function() awesome.xkb_set_layout_group(1) end,
 			{ env.mod }, "space", function() redtip:lang_switch() end,
